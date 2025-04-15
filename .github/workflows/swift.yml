@@ -1,0 +1,25 @@
+name: Swift
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "6.1"
+    - name: Run tests
+      run: swift test -Xswiftc -strict-concurrency=complete --enable-code-coverage
+    - name: Swift coverage
+      uses: drekka/swift-coverage-action@v1.4
+      with:
+        show-all-files: true
+        coverage: 70
