@@ -1,40 +1,46 @@
 # DIve 
 
-A minimalistic Swift dependency injection framework.
+DIve is a minimalistic Swift dependency injection framework.
 
-## Quick Introduction
+Please check out this article for the details: [Introduction to DIve](https://balobanov.com/articles/dive-introduction/)
+
+## Installation
+
+To add the framework to your Xcode project, select `File > Add Package Dependency` and enter `https://github.com/alex-balobanov/dive` as source control repository URL.
+
+To add the framework as a dependency of another Swift package, update the corresponding `Package.swift` file.
+
+```swift
+let package = Package(
+    ...
+    dependencies: [
+        .package(url: "https://github.com/alex-balobanov/dive", from: "2.3.0"),
+    ],
+    ...
+)
+```
+
+## Building a pool manually
 
 `Pool` - an immutable storage for dependencies.
 
-`@Injected` - a property wrapper to access dependencies in pools.  
-
-`SerialLoader` - a serial loader to fill out pools with dependencies in synchronous way. 
-
-`ConcurrentLoader` - a concurrent loader to fill out pools with dependencies in asynchronous way.
-
-### A common use-case of the framework
-
-- create a pool
-- inject dependencies to the pool manually or by using the loaders
-- pass the pool over to an object
-- use the property wrapper to access injected dependencies
-- profit
-
-## Injecting a dependency by type
+### Appending a dependency by type
 
 ```swift
 let pool = Pool()
     .appending(<dependency> [as <type>])
 ```
 
-## Injecting a dependency by key path
+### Appending a dependency by key path
 
 ```swift
 let pool = Pool()
     .appending(<key path>, <dependency>)
 ```
 
-## Using `@Injected` property wrapper
+### Using `@Injected` property wrapper
+
+`@Injected` - a property wrapper to access dependencies in pools.
 
 ```swift
 class <class>: Injectee<Pool> {
@@ -48,78 +54,49 @@ class <class>: Injectee<Pool> {
 - a dependency injected by type
 - lowest: default value
 
-### An example
+## Using loaders
+
+### SerialLoader
+
+`SerialLoader` - a serial loader to fill out pools with dependencies in synchronous way.
 
 ```swift
-class RandomNumber: Injectee<Pool> {
-    @Injected private var generator: RandomNumberGenerator
-
-    func generate(in range: Range<UInt64>) -> UInt64 {
-        .random(in: range, using: &generator)
-    }
-}
-
-let pool = Pool().appending(SystemRandomNumberGenerator())
-let randomNumber = RandomNumber(pool: pool)
-print(randomNumber.generate(in: 0..<10))
+let loader = SerialLoader(dependencies: [
+    <Dependency objects>
+])
+let pool = try loader.load(Pool())
 ```
 
-## Using a custom fatal error handler.
+### ConcurrentLoader
+
+`ConcurrentLoader` - a concurrent loader to fill out pools with dependencies in asynchronous way.
 
 ```swift
-public protocol FatalErrorHandling {
-    func fatalErrorHandler(_ error: Error) -> Never
-}
+let loader = ConcurrentLoader(dependencies: <dependencies>)
+let pool = try await loader.load(Pool())
 ```
 
-### An example
+### ConcurrentLoader + loading events handler
+
+```swift
+actor ConcurrentLoadingEventHandler: ConcurrentLoadingEventHandling { < impl > }
+let handler = ConcurrentLoadingEventHandler()
+let loader = ConcurrentLoader(dependencies: [
+    <Dependency objects>
+])
+let pool = try await loader.load(Pool(), handler)
+```
+
+## Appending a custom fatal error handler
 
 ```swift
 struct FatalErrorHandler: FatalErrorHandling {
     func fatalErrorHandler(_ error: Error) -> Never {
-        print("A fatal error occurred: \(error)")
+        <custom logic here>
         fatalError()
     }
 }
 
-let pool = Pool().appending(FatalErrorHandler() as FatalErrorHandling)
-let randomNumber = RandomNumber(pool: pool)
-print(randomNumber.generate(in: 0..<10))
-```
-
-## Using loaders to fill out pools
-
-### `SerialLoader`
-
-```swift
-let loader = SerialLoader<SyncInjector<Pool>>(dependencies: <dependencies>)
-let pool = try loader.load(Pool())
-```
-
-### `ConcurrentLoader` 
-
-```swift
-let loader = ConcurrentLoader<AsyncInjector<Pool>>(dependencies: <dependencies>)
-let pool = try await loader.load(Pool())
-```
-
-### `ConcurrentLoader` + loading events handler 
-
-```swift
-let handler = ConcurrentLoadingEventHandler()
-let loader = ConcurrentLoader<AsyncInjector<Pool>>(dependencies: <dependencies>)
-let pool = try await loader.load(Pool(), handler)
-```
-
-### An example
-
-```swift
-let loader = ConcurrentLoader<AsyncInjector<Pool>>(dependencies: [
-    .dependency(id: .randomNumberGenerator, dependencies: []) { pool in
-        pool.appending(SystemRandomNumberGenerator())
-    }
-])
-let pool = try await loader.load(Pool())
-let randomNumber = RandomNumber(pool: pool)
-print(randomNumber.generate(in: 0..<10))
+let pool = Pool()
+    .appending(FatalErrorHandler())
 ```
