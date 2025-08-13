@@ -12,10 +12,9 @@ public struct SerialLoader<T: SyncInjecting> {
 
 extension SerialLoader: SerialLoading {
     public func load(_ pool: T.PoolType) throws -> T.PoolType {
-        try dependencies.batch().reduce(pool, { pool, batch in
-            pool.appending(try batch.reduce(pool, { pool, dependency in
-                pool.appending(try dependency.injector.inject(pool))
-            }))
+        let dependencySequence = try DependencySequence(dependencies: dependencies)
+        return try dependencySequence.reduce(pool, { pool, dependency in
+            pool.appending(try dependency.injector.inject(pool))
         })
     }
 }

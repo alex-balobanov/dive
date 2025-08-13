@@ -67,6 +67,22 @@ let loader = SerialLoader(dependencies: [
 let pool = try loader.load(Pool())
 ```
 
+### DependencySequence
+
+`DependencySequence` - provides an ordered sequence of dependencies arranged in the right order to fill out pools in a synchronous way manually to have full control on the process. `SerialLoader` uses `DependencySequence` under the hood to load and inject dependencies.
+
+```swift
+let dependencySequence = try DependencySequence(
+    dependencies: <Dependency objects>
+)
+let pool = try dependencySequence.reduce(Pool(), { pool, dependency in
+    // <extra actions on the dependency before injecting to the pool>
+    let newPool = pool.appending(try dependency.injector.inject(pool))
+    // <extra actions on the dependency after injecting to the pool>
+    return newPool 
+})
+```
+
 ### ConcurrentLoader
 
 `ConcurrentLoader` - a concurrent loader to fill out pools with dependencies in asynchronous way.
