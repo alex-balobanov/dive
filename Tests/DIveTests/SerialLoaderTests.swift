@@ -12,7 +12,7 @@ struct SerialLoaderTests {
         #expect(try pool.valid())
     }
 
-    @Test("The serial loader throws an error when loads cyclic dependencies")
+    @Test("The serial loader throws notDAG error when loads cyclic dependencies")
     func loadCyclicDependencies() {
         let loader = SerialLoader(dependencies: .cyclic)
         #expect(throws: LoaderError.notDAG) {
