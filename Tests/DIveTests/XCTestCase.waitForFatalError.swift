@@ -1,19 +1,20 @@
 // Created by Alex Balobanov
 
 import XCTest
+import os
 import DIve
 
 extension XCTestCase {
-    func waitForFatalError<P: AbstractPool>(
+    func waitForFatalError<P: AbstractPool & Sendable>(
         timeout: TimeInterval = .timeout,
         pool: P,
-        block: @escaping (P) -> Void
+        block: @escaping @Sendable (P) -> Void
     ) -> Error? {
         let expectation = self.expectation(description: "FatalError")
 
-        var receivedError: Error?
+        let receivedError = OSAllocatedUnfairLock<Error?>(initialState: nil)
         let fatalErrorHandler = FatalErrorHandler(fatalErrorOccured: { error in
-            receivedError = error
+            receivedError.withLock { $0 = error }
             expectation.fulfill()
         })
 
@@ -23,7 +24,7 @@ extension XCTestCase {
 
         wait(for: [expectation], timeout: timeout)
 
-        return receivedError
+        return receivedError.withLock { $0 }
     }
 }
 

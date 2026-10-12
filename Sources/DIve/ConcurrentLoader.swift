@@ -3,7 +3,7 @@
 import Foundation
 
 /// The  implementation of ``ConcurrentLoading`` protocol.
-public struct ConcurrentLoader<T: AsyncInjecting> {
+public struct ConcurrentLoader<T: AsyncInjecting & Sendable> where T.PoolType: Sendable {
     public typealias DependencyType = Dependency<T>
     private let dependencies: Set<DependencyType>
 
@@ -33,7 +33,7 @@ extension ConcurrentLoader: ConcurrentLoading {
 }
 
 private extension ConcurrentLoader {
-    typealias DependencyLoaderClosure = (T.PoolType, DependencyType) async throws -> T.PoolType
+    typealias DependencyLoaderClosure = @Sendable (T.PoolType, DependencyType) async throws -> T.PoolType
 
     func load(
         _ pool: T.PoolType,
@@ -42,13 +42,14 @@ private extension ConcurrentLoader {
         let batches = try dependencies.batch()
         var pool = pool
         for batch in batches {
+            let current = pool
             pool = try await withThrowingTaskGroup(of: T.PoolType.self) { group in
                 batch.forEach { dependency in
                     group.addTask(priority: .userInitiated) {
-                        try await loader(pool, dependency)
+                        try await loader(current, dependency)
                     }
                 }
-                return try await group.reduce(pool, { pool, newpool in pool.appending(newpool) })
+                return try await group.reduce(current, { pool, newpool in pool.appending(newpool) })
             }
         }
         return pool

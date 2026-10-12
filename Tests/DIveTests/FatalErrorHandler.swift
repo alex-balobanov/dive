@@ -4,7 +4,7 @@ import DIve
 import Foundation
 
 struct FatalErrorHandler {
-    let fatalErrorOccured: (Error) -> Void
+    let fatalErrorOccured: @Sendable (Error) -> Void
 }
 
 extension FatalErrorHandler: FatalErrorHandling {

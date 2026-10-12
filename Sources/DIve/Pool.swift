@@ -6,6 +6,10 @@ public struct Pool {
     private let overrides: [AnyKeyPath: Any]
 }
 
+/// `Pool` is immutable, so sharing it across concurrency domains is safe.
+/// The thread safety of the stored objects is the responsibility of the caller.
+extension Pool: @unchecked Sendable {}
+
 extension Pool {
     public init() {
         self.init(defaults: [:], overrides: [:])

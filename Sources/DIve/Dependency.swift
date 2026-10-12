@@ -24,3 +24,5 @@ extension Dependency: Hashable {
 }
 
 extension Dependency: AbstractDependency {}
+
+extension Dependency: Sendable where T: Sendable {}

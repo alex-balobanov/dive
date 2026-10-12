@@ -17,3 +17,6 @@ extension InjectedError: CustomStringConvertible {
 }
 
 extension InjectedError: Error {}
+
+/// Key paths and metatypes are immutable, so sharing them across concurrency domains is safe.
+extension InjectedError: @unchecked Sendable {}

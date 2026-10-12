@@ -20,3 +20,5 @@ extension DependencyId: CustomStringConvertible {
 }
 
 extension DependencyId: Hashable {}
+
+extension DependencyId: Sendable {}

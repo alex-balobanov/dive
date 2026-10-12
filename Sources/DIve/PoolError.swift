@@ -20,3 +20,6 @@ extension PoolError: CustomStringConvertible {
 }
 
 extension PoolError: Error {}
+
+/// Key paths and metatypes are immutable, so sharing them across concurrency domains is safe.
+extension PoolError: @unchecked Sendable {}

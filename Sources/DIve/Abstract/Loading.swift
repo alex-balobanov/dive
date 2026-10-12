@@ -1,7 +1,7 @@
 // Created by Alex Balobanov
 
 /// Concurrent loading events.
-public protocol ConcurrentLoadingEventHandling {
+public protocol ConcurrentLoadingEventHandling: Sendable {
     /// This function calls by a concurrent loader before loading the dependency with `dependencyId`.
     /// - Parameter dependencyId: a unique dependency identifier.
     func willLoadDependency(_ dependencyId: DependencyId) async

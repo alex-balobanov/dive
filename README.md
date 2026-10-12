@@ -14,7 +14,7 @@ To add the framework as a dependency of another Swift package, update the corres
 let package = Package(
     ...
     dependencies: [
-        .package(url: "https://github.com/alex-balobanov/dive", from: "2.3.0"),
+        .package(url: "https://github.com/alex-balobanov/dive", from: "3.0.0"),
     ],
     ...
 )

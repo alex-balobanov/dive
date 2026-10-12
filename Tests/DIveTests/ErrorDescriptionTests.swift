@@ -10,8 +10,8 @@ struct ErrorDescriptionTests {
         #expect(String(describing: LoaderError.notDAG) == "Not a directed acyclic graph")
     }
 
-    @Test("Check PoolError.objectNotFoundForType description", arguments: [Int.self, String.self])
-    func objectNotFoundForType(_ type: Any.Type) async throws {
+    @Test("Check PoolError.objectNotFoundForType description", arguments: [Int.self, String.self] as [any Sendable.Type])
+    func objectNotFoundForType(_ type: any Sendable.Type) async throws {
         let expectedDescription = "Object not found for type: \(type)"
         #expect(String(describing: PoolError.objectNotFoundForType(type)) == expectedDescription)
     }
@@ -22,8 +22,8 @@ struct ErrorDescriptionTests {
         #expect(String(describing: PoolError.objectNotFoundForKeyPath(keyPath)) == expectedDescription)
     }
 
-    @Test("Check InjectedError.objectNotFound description", arguments: zip([\TestObject.int, \TestObject.string], [Int.self, String.self]))
-    func objectNotFound(_ keyPath: AnyKeyPath, _ type: Any.Type) async throws {
+    @Test("Check InjectedError.objectNotFound description", arguments: zip([\TestObject.int, \TestObject.string], [Int.self, String.self] as [any Sendable.Type]))
+    func objectNotFound(_ keyPath: AnyKeyPath, _ type: any Sendable.Type) async throws {
         let expectedDescription = "Object not found for key path \(keyPath) or type \(type)."
         #expect(String(describing: InjectedError.objectNotFound(keyPath, type)) == expectedDescription)
     }

@@ -13,7 +13,7 @@ public extension AsyncInjectingDependency<Pool> {
     static func dependency(
         id: DependencyId,
         dependencies: Set<DependencyId>,
-        injector: @escaping (Pool) async throws -> Pool
+        injector: @escaping @Sendable (Pool) async throws -> Pool
     ) -> Self {
         .init(id: id, dependencies: dependencies, injector: .init(injector: injector))
     }
